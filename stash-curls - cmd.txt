@@ -1,0 +1,5 @@
+#Create Project
+#curl -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json"  -H "Content-Type: application/json"  "https://stash:8443/rest/api/latest/projects" -d '{"key":"'${Project_Name}'", "name":"'${Project_Name}'", "description":"Repo for '${Project_Name}' team"}'
+
+# Create GIT Repo
+curl -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json"  -H "Content-Type: application/json" "https://stash:8443/projects/${Project_Name}/repos?create" -d '{"name": "'${Repo_Name}'"}'

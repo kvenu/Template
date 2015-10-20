@@ -1,0 +1,107 @@
+#Set user variable
+User_Name=SVC-CLI-jenkins
+
+#create Nexus SNAPSHOT Repo
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/repositories" -d '{"data":{"repoType":"hosted","id":"'${Project}'_SNAPSHOT","name":"'${Project}' SNAPSHOT","writePolicy":"ALLOW_WRITE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":1440,"repoPolicy":"SNAPSHOT","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}'
+
+# create Nexus RELEASE Repo
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/repositories" -d '{"data":{"repoType":"hosted","id":"'${Project}'_RELEASE","name":"'${Project}' RELEASE","writePolicy":"ALLOW_WRITE_ONCE","browseable":true,"indexable":true,"exposed":true,"notFoundCacheTTL":1440,"repoPolicy":"RELEASE","provider":"maven2","providerRole":"org.sonatype.nexus.proxy.repository.Repository","downloadRemoteIndexes":false,"checksumPolicy":"IGNORE"}}'
+
+#Create Snapshot Privileges
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config1 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_SNAPSHOT","description":"Snapshot repo privilege","type":"target","repositoryId":"'${Project}'_SNAPSHOT","repositoryTargetId":"any","methods":["create"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config2 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_SNAPSHOT","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_SNAPSHOT","repositoryTargetId":"any","methods":["delete"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config3 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_SNAPSHOT","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_SNAPSHOT","repositoryTargetId":"any","methods":["update"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config4 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_SNAPSHOT","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_SNAPSHOT","repositoryTargetId":"any","methods":["read"]}}'
+
+
+#Create Snapshot Role
+
+var1=`cut -d '"' -f6 < config1`
+
+var2=`cut -d '"' -f6 < config2`
+
+var3=`cut -d '"' -f6 < config3`
+
+var4=`cut -d '"' -f6 < config4`
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/roles" -d '{"data":{"id":"'${Project}'_SNAPSHOT_Role","name":"'${Project}'_SNAPSHOT_Role","description":"'${Project}'_SNAPSHOT_Role","privileges":["'$var1'","'$var2'","'$var3'","'$var4'"]}}'
+
+#Delete temp files
+rm -rf config1 config2 config3 config4
+
+#Create Release Privileges
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config5 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_RELEASE","description":"Snapshot repo privilege","type":"target","repositoryId":"'${Project}'_RELEASE","repositoryTargetId":"any","methods":["create"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config6 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_RELEASE","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_RELEASE","repositoryTargetId":"any","methods":["delete"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config7 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_RELEASE","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_RELEASE","repositoryTargetId":"any","methods":["update"]}}'
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" -o config8 "https://nexus:8443/nexus/service/local/privileges_target" -d '{"data":{"name":"'${Project}'_RELEASE","description":"Snapshot repo  privilege","type":"target","repositoryId":"'${Project}'_RELEASE","repositoryTargetId":"any","methods":["read"]}}'
+
+
+#Create Release Role
+
+var1=`cut -d '"' -f6 < config5`
+
+var2=`cut -d '"' -f6 < config6`
+
+var3=`cut -d '"' -f6 < config7`
+
+var4=`cut -d '"' -f6 < config8`
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/roles" -d '{"data":{"id":"'${Project}'_RELEASE_Role","name":"'${Project}'_RELEASE_Role","description":"'${Project}'_RELEASE_Role","privileges":["'$var1'","'$var3'","'$var4'"]}}'
+
+#Delete temp files
+rm -rf config5 config6 config7 config8
+
+#Create Nexus User for publishing
+
+curl -k -u ${User_Name}:${User_Password} -X POST -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/users" -d '{"data":{"userId":"'${Project}'_publishuser","email":"venu.kumaresan@barclayscorp.com","status":"active","firstName":"Kumaresan","lastName":"Venu","password":"'$PublishUser_Password'","roles":["ui-archive-browser","ui-basic","ui-repo-browser","usertoken-basic","'${Project}'_RELEASE_Role","'${Project}'_SNAPSHOT_Role"]}}'
+
+#Add LDAP Users
+
+curl -k -u ${User_Name}:${User_Password} -X PUT -H "Accept: application/json" -H "Content-Type: application/json" "https://nexus:8443/nexus/service/local/user_to_roles" -d '{"data":{"source":"LDAP","userId":['$Users'],"roles":["ui-archive-browser","ui-basic","ui-repo-browser","usertoken-basic"]}}'
+
+
+echo "============================================================================================================================================"
+
+#Get the token of the created publish user and update settings.xml file
+
+usertoken=`echo -n "${Project}_publishuser" | openssl base64`
+passwordtoken=`echo -n "$PublishUser_Password" | openssl base64`
+
+#Get the single use token
+curl -k -H "Accept: application/json" -H "Content-Type: application/json" --data '{"u":"'$usertoken'","p":"'$passwordtoken'"}' -o config.cfg -u ${Project}_publishuser:$PublishUser_Password https://nexus:8443/nexus/service/siesta/wonderland/authenticate
+
+var5=`cat config.cfg | head -2 | tail -1 | cut -d '"' -f4`
+
+#Get the authication token for the publish user 
+curl -k -u ${Project}_publishuser:$PublishUser_Password -o config1.cfg -H "Accept: application/json" -H "Content-Type: application/json" -H "X-NX-AuthTicket: $var5" https://nexus:8443/nexus/service/siesta/usertoken/current
+
+cfg1=`cat config1.cfg | head -2 | tail -1 | cut -d '"' -f4`
+cfg2=`cat config1.cfg | head -3 | tail -1 | cut -d '"' -f4`
+
+echo $cfg1
+echo $cfg2
+
+sed '$d' -i settings.xml
+sed '$d' -i settings.xml
+echo "<server>" >> settings.xml
+echo "   <id>$Project</id>" >> settings.xml
+echo "   <username>$cfg1</username>" >> settings.xml
+echo "   <password>$cfg2</password>" >> settings.xml
+echo "</server>" >> settings.xml
+echo "</servers>" >> settings.xml
+echo "</settings>" >> settings.xml
+
+#Delete temp files
+rm -rf config1.cfg
+
+echo "============================================================================================================"
+
+git commit -m "Added server tag for Project '$Project'" settings.xml
